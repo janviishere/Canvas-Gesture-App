@@ -1,4 +1,4 @@
-# 🖐️ Canvas Gesture App
+# ✨ Canvas Gesture App
 
 An interactive, touchless drawing application that allows you to draw and select colors on a digital canvas using hand gestures captured straight from your webcam. Experience the magic of computer vision directly in your browser without any server-side processing!
 
