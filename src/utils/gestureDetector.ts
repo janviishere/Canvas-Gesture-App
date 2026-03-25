@@ -1,32 +1,34 @@
 import { HandLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 
 let handLandmarker: HandLandmarker | null = null;
-let isInitializing = false;
+let initPromise: Promise<HandLandmarker | null> | null = null;
 
 export async function initializeHandLandmarker(): Promise<HandLandmarker | null> {
   if (handLandmarker) return handLandmarker;
-  if (isInitializing) return null; // Prevent multiple simultaneous initializations
+  if (initPromise) return initPromise;
   
-  isInitializing = true;
-  try {
-    const vision = await FilesetResolver.forVisionTasks(
-      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
-    );
-    handLandmarker = await HandLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-        delegate: "CPU"
-      },
-      runningMode: "VIDEO",
-      numHands: 1
-    });
-    return handLandmarker;
-  } catch (error: any) {
-    console.error("Failed to initialize MediaPipe:", error);
-    throw new Error(error?.message || String(error))
-  } finally {
-    isInitializing = false;
-  }
+  initPromise = new Promise(async (resolve, reject) => {
+    try {
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+      );
+      const newLandmarker = await HandLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+          delegate: "CPU"
+        },
+        runningMode: "VIDEO",
+        numHands: 1
+      });
+      handLandmarker = newLandmarker;
+      resolve(newLandmarker);
+    } catch (error: any) {
+      console.error("Failed to initialize MediaPipe:", error);
+      initPromise = null;
+      reject(new Error(error?.message || String(error)));
+    }
+  });
+  return initPromise;
 }
 
 export interface GestureResult {
