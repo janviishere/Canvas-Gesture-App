@@ -9,6 +9,9 @@ An interactive, touchless drawing application that allows you to draw and select
 - **Privacy-First**: Everything runs entirely client-side. No camera footage or data is ever sent to a remote server.
 - **Hardware Agnostic**: Built utilizing a robust CPU inference fallback, ensuring broad compatibility across virtually any laptop or desktop hardware.
 
+## 🎥 Demo Video
+https://github.com/janviishere/Canvas-Gesture-App/blob/main/Canvas%20Gesture%20Demo.mp4
+
 ## 🛠️ Technologies Used
 - **React 18** + **Vite**
 - **TypeScript**
