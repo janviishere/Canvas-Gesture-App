@@ -1,0 +1,2 @@
+﻿src/components/DrawingCanvas.tsx(163,50): error TS7006: Parameter 'lm' implicitly has an 'any' type.
+src/utils/gestureDetector.ts(1,49): error TS2307: Cannot find module '@mediapipe/tasks-vision' or its corresponding type declarations.

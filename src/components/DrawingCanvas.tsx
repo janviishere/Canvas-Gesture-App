@@ -17,15 +17,15 @@ interface DrawingCanvasProps {
 }
 
 const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
-  ({ 
-    currentColor, 
-    isDrawing, 
-    cursorPosition, 
-    videoRef, 
+  ({
+    currentColor,
+    isDrawing,
+    cursorPosition,
+    videoRef,
     debugCanvasRef,
     showDebug,
-    onDrawingStateChange, 
-    onCursorPositionChange, 
+    onDrawingStateChange,
+    onCursorPositionChange,
     onHandDetectedChange,
     onColorHover,
     onColorSelect,
@@ -37,7 +37,7 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
     const animationFrameRef = useRef<number>()
     const gestureSmootherRef = useRef(new GestureSmoother())
     const isSelectingRef = useRef(false)
-    
+
     // Core states
     const [isModelReady, setIsModelReady] = useState(false)
     const [diagnosticStatus, setDiagnosticStatus] = useState("Status: Initializing React Mount...")
@@ -58,7 +58,7 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
           setDiagnosticStatus("ERROR: Model null. Failed to initialize. Check your console log (F12) for CORS or Network issues.");
         }
       }).catch(err => {
-         if (isMounted) setDiagnosticStatus("CRITICAL ERROR: " + (err?.message || "Unknown Initialization Error"));
+        if (isMounted) setDiagnosticStatus("CRITICAL ERROR: " + (err?.message || "Unknown Initialization Error"));
       });
       return () => { isMounted = false };
     }, [])
@@ -89,7 +89,7 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
 
         if (tempCtx && tempCanvas.width > 0) ctx.drawImage(tempCanvas, 0, 0)
       }
-      
+
       resizeCanvas()
       window.addEventListener('resize', resizeCanvas)
       return () => window.removeEventListener('resize', resizeCanvas)
@@ -105,7 +105,7 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
     useEffect(() => {
       const video = videoRef.current
       const debugCanvas = debugCanvasRef.current
-      
+
       if (!video) {
         if (isModelReady) setDiagnosticStatus("Status: Camera stream blocked or video element missing.")
         return
@@ -139,17 +139,17 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
           animationFrameRef.current = requestAnimationFrame(detectGesture)
           return
         }
-        
+
         lastVideoTime = video.currentTime
         const nowInMs = performance.now()
         let result: any = { isPinching: false, position: null, confidence: 0, handDetected: false, landmarks: undefined }
-        
+
         try {
           // Track detection success
           result = detectHandGestureWithML(video, nowInMs)
           frameCounter++
           if (frameCounter % 60 === 0) {
-             setDiagnosticStatus(`Status: Tracking Active. FPS OK. Hand Detected: ${result.handDetected}`)
+            setDiagnosticStatus(`Status: Tracking Active. FPS OK. Hand Detected: ${result.handDetected}`)
           }
         } catch (e: any) {
           console.error("Poll Error:", e)
@@ -158,41 +158,41 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
 
         if (showDebug && debugCanvas && debugCtx) {
           debugCtx.clearRect(0, 0, debugCanvas.width, debugCanvas.height)
-          
+
           if (result.landmarks && result.handDetected && Array.isArray(result.landmarks)) {
-             const points = result.landmarks.map(lm => ({
-                 x: (1 - lm.x) * debugCanvas.width,
-                 y: lm.y * debugCanvas.height
-             }))
+            const points = result.landmarks.map((lm: any) => ({
+              x: (1 - lm.x) * debugCanvas.width,
+              y: lm.y * debugCanvas.height
+            }))
 
-             const HAND_CONNECTIONS = [
-               [0, 1], [1, 2], [2, 3], [3, 4], 
-               [0, 5], [5, 6], [6, 7], [7, 8], 
-               [5, 9], [9, 10], [10, 11], [11, 12], 
-               [9, 13], [13, 14], [14, 15], [15, 16], 
-               [13, 17], [17, 18], [18, 19], [19, 20], 
-               [0, 17]
-             ]
-             
-             // Glowing infra-green rays effect
-             debugCtx.strokeStyle = result.isPinching ? '#ff0055' : '#00ffaa'
-             debugCtx.lineWidth = 3
-             debugCtx.lineCap = 'round'
-             debugCtx.lineJoin = 'round'
-             debugCtx.shadowColor = result.isPinching ? '#ff0055' : '#00ffaa'
-             debugCtx.shadowBlur = 10
+            const HAND_CONNECTIONS = [
+              [0, 1], [1, 2], [2, 3], [3, 4],
+              [0, 5], [5, 6], [6, 7], [7, 8],
+              [5, 9], [9, 10], [10, 11], [11, 12],
+              [9, 13], [13, 14], [14, 15], [15, 16],
+              [13, 17], [17, 18], [18, 19], [19, 20],
+              [0, 17]
+            ]
 
-             debugCtx.beginPath()
-             for (const [startIdx, endIdx] of HAND_CONNECTIONS) {
-                 if (points[startIdx] && points[endIdx]) {
-                     debugCtx.moveTo(points[startIdx].x, points[startIdx].y)
-                     debugCtx.lineTo(points[endIdx].x, points[endIdx].y)
-                 }
-             }
-             debugCtx.stroke()
-             
-             // Reset shadow
-             debugCtx.shadowBlur = 0
+            // Glowing infra-green rays effect
+            debugCtx.strokeStyle = result.isPinching ? '#ff0055' : '#00ffaa'
+            debugCtx.lineWidth = 3
+            debugCtx.lineCap = 'round'
+            debugCtx.lineJoin = 'round'
+            debugCtx.shadowColor = result.isPinching ? '#ff0055' : '#00ffaa'
+            debugCtx.shadowBlur = 10
+
+            debugCtx.beginPath()
+            for (const [startIdx, endIdx] of HAND_CONNECTIONS) {
+              if (points[startIdx] && points[endIdx]) {
+                debugCtx.moveTo(points[startIdx].x, points[startIdx].y)
+                debugCtx.lineTo(points[endIdx].x, points[endIdx].y)
+              }
+            }
+            debugCtx.stroke()
+
+            // Reset shadow
+            debugCtx.shadowBlur = 0
           }
         }
 
@@ -215,7 +215,7 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(
         if (smoothedPosition) {
           const screenX = (1 - smoothedPosition.x) * window.innerWidth
           const screenY = smoothedPosition.y * window.innerHeight
-          
+
           onCursorPositionChange({ x: screenX, y: screenY })
 
           const SELECTION_ZONE_Y = window.innerHeight * 0.35
